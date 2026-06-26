@@ -1,0 +1,4 @@
+interface:
+  display_name: "API Contract Review"
+  short_description: "Review API schema and client compatibility changes"
+  default_prompt: "Use $api-contract-review to review this API contract change."

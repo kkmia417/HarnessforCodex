@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Change Review"
+  short_description: "Review React UI behavior, accessibility, and responsive risk"
+  default_prompt: "Use $ui-change-review to review this UI change."

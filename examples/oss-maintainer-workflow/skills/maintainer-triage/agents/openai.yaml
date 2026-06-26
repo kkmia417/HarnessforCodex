@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintainer Triage"
+  short_description: "Classify OSS issues and propose maintainer next steps"
+  default_prompt: "Use $maintainer-triage to triage this issue."
