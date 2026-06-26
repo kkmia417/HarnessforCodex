@@ -133,7 +133,7 @@ For high-risk or large harnesses:
 - Add assertions for required outputs.
 - Add a QA/reviewer skill or workflow.
 
-Read `references/skill-testing-guide.md` and `references/qa-agent-guide.md` when validation needs more than structural checks.
+Read `references/skill-testing-guide.md`, `references/evaluation-prompts.md`, and `references/qa-agent-guide.md` when validation needs more than structural checks.
 
 ### Phase 7: Evolution
 
@@ -166,6 +166,7 @@ A full Codex harness should include:
   - `references/orchestrator-template.md`
   - `references/skill-writing-guide.md`
   - `references/skill-testing-guide.md`
+  - `references/evaluation-prompts.md`
   - `references/qa-agent-guide.md`
   - `references/team-examples.md`
   - `references/project-integration.md`

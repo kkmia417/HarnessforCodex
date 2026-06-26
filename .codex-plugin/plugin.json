@@ -1,0 +1,33 @@
+{
+  "name": "harnessforcodex",
+  "version": "0.1.0",
+  "description": "Codex skills and references for designing, reviewing, validating, and evolving project harnesses.",
+  "author": {
+    "name": "Harness for Codex Maintainers"
+  },
+  "keywords": [
+    "codex",
+    "skills",
+    "harness",
+    "workflow",
+    "validation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Harness for Codex",
+    "shortDescription": "Reusable Codex skills for harness and workflow architecture",
+    "longDescription": "A package of Codex skills, references, scripts, and validation workflows for creating and maintaining repository-local harnesses.",
+    "developerName": "Harness for Codex Maintainers",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "brandColor": "#2563EB",
+    "defaultPrompt": [
+      "Use $codex-harness to design a project harness.",
+      "Use $repo-review to review this repository change.",
+      "Use $release-readiness to run release gates."
+    ]
+  }
+}

@@ -64,6 +64,10 @@ For important skills, compare outcomes:
 
 Score against assertions, not vibes.
 
+For harness-level evaluation scenarios, use `references/evaluation-prompts.md`.
+Keep evaluation prompts separate from assertions so the model under test does not
+receive the expected answer.
+
 ## Assertion Design
 
 Good assertions are discriminating and observable:

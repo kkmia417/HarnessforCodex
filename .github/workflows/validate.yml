@@ -1,0 +1,69 @@
+name: Validate Codex Harness
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    name: Harness and skill validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate repository harness
+        run: python skills/codex-harness/scripts/validate_codex_harness.py .
+
+      - name: Validate each skill directory
+        shell: bash
+        run: |
+          set -u
+
+          quick_validate="${CODEX_QUICK_VALIDATE:-}"
+          if [[ -z "$quick_validate" ]]; then
+            for candidate in \
+              "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" \
+              "$HOME/.codex/skills/skill-creator/scripts/quick_validate.py"
+            do
+              if [[ -f "$candidate" ]]; then
+                quick_validate="$candidate"
+                break
+              fi
+            done
+          fi
+
+          if [[ -n "$quick_validate" && -f "$quick_validate" ]]; then
+            echo "Using Codex quick validator: $quick_validate"
+          else
+            echo "Codex quick validator not found; using repository validator for per-skill checks."
+            quick_validate=""
+          fi
+
+          failed=0
+          for skill_dir in skills/*; do
+            [[ -d "$skill_dir" ]] || continue
+
+            echo "::group::Validate $skill_dir"
+            if [[ -n "$quick_validate" ]]; then
+              python "$quick_validate" "$skill_dir"
+              status=$?
+            else
+              python skills/codex-harness/scripts/validate_codex_harness.py "$skill_dir"
+              status=$?
+            fi
+            echo "::endgroup::"
+
+            if [[ "$status" -ne 0 ]]; then
+              echo "::error file=$skill_dir/SKILL.md,title=Skill validation failed::$skill_dir failed validation"
+              failed=1
+            fi
+          done
+
+          exit "$failed"
