@@ -17,3 +17,6 @@ codex-harness validate examples/oss-maintainer-workflow
 
 Use these as starting points for repository-specific skills rather than as
 universal rules.
+
+Each example includes a `scenarios/` note with a realistic prompt, the files or
+boundaries to inspect, and the kind of result the skill should produce.

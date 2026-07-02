@@ -13,3 +13,7 @@ Prompt:
 ```text
 Use $api-contract-review to review this API change for schema drift, client compatibility, docs, tests, and release risk.
 ```
+
+Scenario:
+
+- [Schema drift review](scenarios/schema-drift.md)

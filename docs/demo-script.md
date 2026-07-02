@@ -21,11 +21,11 @@ mkdir -p examples/sandbox
 1. Show that `examples/sandbox` has no skills.
 2. Run `codex-harness init examples/sandbox --all`.
 3. Run `codex-harness validate examples/sandbox`.
-4. Show `examples/sandbox/skills`.
+4. Show `examples/sandbox/.agents/skills`.
 5. Create a project-specific skill:
 
 ```bash
-codex-harness new api-contract-review --path examples/sandbox/skills \
+codex-harness new api-contract-review --path examples/sandbox/.agents/skills \
   --description "Review API contract changes, generated clients, documentation, and consumer compatibility. Use when asked to check API changes, schema drift, client compatibility, or integration release risk."
 ```
 
@@ -40,6 +40,17 @@ codex-harness validate examples/sandbox
 ```text
 Use $repo-review to review the current diff.
 ```
+
+## Optional Marketplace Beat
+
+If the recording includes plugin distribution, show the marketplace catalog:
+
+```bash
+codex-harness marketplace examples/sandbox/.agents/plugins/marketplace.json --force
+```
+
+Explain that the catalog expects the plugin to be mirrored under
+`plugins/harnessforcodex` relative to the marketplace root.
 
 ## Suggested Caption
 

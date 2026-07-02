@@ -32,6 +32,8 @@ dependencies = []
 Homepage = "https://github.com/kkmia417/HarnessforCodex"
 Repository = "https://github.com/kkmia417/HarnessforCodex"
 Issues = "https://github.com/kkmia417/HarnessforCodex/issues"
+Documentation = "https://github.com/kkmia417/HarnessforCodex/tree/main/docs"
+Changelog = "https://github.com/kkmia417/HarnessforCodex/blob/main/CHANGELOG.md"
 
 [project.scripts]
 codex-harness = "codex_harness.cli:main"

@@ -14,3 +14,7 @@ Prompt:
 ```text
 Use $maintainer-triage to classify this issue and propose the next maintainer action.
 ```
+
+Scenario:
+
+- [Release blocker triage](scenarios/release-blocker.md)

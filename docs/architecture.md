@@ -6,7 +6,10 @@ application.
 
 ## Core Concepts
 
-- A skill is the user-facing workflow contract. It lives in `skills/<name>/SKILL.md`.
+- A skill is the user-facing workflow contract. In this repository, packaged
+  source skills live in `skills/<name>/SKILL.md`.
+- Installed repository skills live in `.agents/skills/<name>/SKILL.md` by
+  default, matching Codex repository skill discovery.
 - A reference is stable supporting knowledge. It lives under a skill's `references/`.
 - A script is deterministic support logic. It lives under a skill's `scripts/` or the root `scripts/`.
 - Agent metadata lives in `agents/openai.yaml` and describes how Codex should expose the skill.
@@ -27,12 +30,18 @@ Plain prompts are easy to copy and hard to govern. Skills provide:
 `codex-harness validate` checks every skill in a repository or a single skill directory.
 
 `codex-harness init` installs Harness for Codex skills into another repository.
+The default target is `.agents/skills`; pass `--skill-layout legacy` for the
+older root `skills/` layout or `--skill-layout both` during migration.
 
-`codex-harness sync` installs selected skills into the local Codex skills directory.
+`codex-harness sync` installs selected skills into the user-level Codex skills directory.
 
 `codex-harness new` scaffolds a new repository-local skill with required metadata.
+
+`codex-harness marketplace` writes a Codex plugin marketplace catalog for local
+or team distribution.
 
 ## Compatibility
 
 The repository keeps the PowerShell sync script for Windows users who do not want
 to install the Python package. The Python CLI is the preferred cross-platform path.
+Both validators accept `.agents/skills` and the older root `skills/` layout.

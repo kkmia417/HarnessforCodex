@@ -13,3 +13,7 @@ Prompt:
 ```text
 Use $ui-change-review to review this interaction change across states, accessibility, responsive layout, and tests.
 ```
+
+Scenario:
+
+- [Responsive state review](scenarios/responsive-state.md)

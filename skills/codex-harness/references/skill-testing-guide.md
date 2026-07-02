@@ -19,7 +19,8 @@ Run:
 
 ```bash
 python skills/codex-harness/scripts/validate_codex_harness.py .
-python C:/Users/kkmia/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/<skill-name>
+CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+python "$CODEX_HOME/skills/.system/skill-creator/scripts/quick_validate.py" skills/<skill-name>
 ```
 
 ### 2. Trigger Coverage

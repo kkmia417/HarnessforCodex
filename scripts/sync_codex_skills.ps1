@@ -21,7 +21,7 @@ param(
     [ValidateNotNullOrEmpty()]
     [string[]]$Skill,
 
-    [string]$DestinationRoot = (Join-Path $env:USERPROFILE ".codex\skills")
+    [string]$DestinationRoot = (Join-Path $env:USERPROFILE ".agents\skills")
 )
 
 $ErrorActionPreference = "Stop"

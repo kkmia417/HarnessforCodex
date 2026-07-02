@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -11,9 +12,18 @@ from pathlib import Path
 
 FRONTMATTER_RE = re.compile(r"^---\n(?P<body>.*?)\n---\n", re.DOTALL)
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-REFERENCE_RE = re.compile(r"(?:^|[`('\\\"])(references/[A-Za-z0-9_.\-/]+\.md)")
+REFERENCE_RE = re.compile(r"(?:^|[\s`('\\\"])(references/[A-Za-z0-9_.\-/]+\.md)", re.MULTILINE)
 TODO_RE = re.compile(r"\bTODO\b|\[TODO", re.IGNORECASE)
+LOCAL_PATH_RE = re.compile(r"(?:[A-Za-z]:[/\\]Users[/\\][^\s`'\"<>]+|/home/[A-Za-z0-9._-]+/[^\s`'\"<>]+)")
 RESOURCE_NAMES = {"references", "scripts", "assets"}
+OFFICIAL_SKILLS_DIR = Path(".agents") / "skills"
+LEGACY_SKILLS_DIR = Path("skills")
+DEFAULT_USER_SKILLS_DIR = Path.home() / ".agents" / "skills"
+SKILL_LAYOUTS = {
+    "official": (OFFICIAL_SKILLS_DIR,),
+    "legacy": (LEGACY_SKILLS_DIR,),
+    "both": (OFFICIAL_SKILLS_DIR, LEGACY_SKILLS_DIR),
+}
 
 
 @dataclass(frozen=True)
@@ -65,6 +75,30 @@ def _validate_references(skill_dir: Path, text: str) -> list[Finding]:
     return findings
 
 
+def _validate_no_local_paths(path: Path) -> list[Finding]:
+    text = path.read_text(encoding="utf-8")
+    if LOCAL_PATH_RE.search(text):
+        return [
+            Finding(
+                "ERROR",
+                f"{path}: machine-local absolute path is not allowed; use $CODEX_HOME or a repo-relative path",
+            )
+        ]
+    return []
+
+
+def _validate_shared_markdown(skill_dir: Path) -> list[Finding]:
+    paths = [skill_dir / "SKILL.md"]
+    references_dir = skill_dir / "references"
+    if references_dir.exists():
+        paths.extend(sorted(references_dir.rglob("*.md")))
+
+    findings: list[Finding] = []
+    for path in paths:
+        findings.extend(_validate_no_local_paths(path))
+    return findings
+
+
 def _validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
     path = skill_dir / "agents" / "openai.yaml"
     if not path.exists():
@@ -80,6 +114,13 @@ def _validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
     if f"${skill_name}" not in prompt:
         findings.append(Finding("ERROR", f"{path}: default_prompt must contain ${skill_name}"))
     return findings
+
+
+def _has_skill_source_root(candidate: Path) -> bool:
+    source_skills = candidate / "skills"
+    return source_skills.exists() and any(
+        child.is_dir() and (child / "SKILL.md").exists() for child in source_skills.iterdir()
+    )
 
 
 def validate_skill(skill_dir: Path) -> list[Finding]:
@@ -110,6 +151,7 @@ def validate_skill(skill_dir: Path) -> list[Finding]:
     if TODO_RE.search(text):
         findings.append(Finding("ERROR", f"{skill_md}: unresolved TODO placeholder"))
 
+    findings.extend(_validate_shared_markdown(skill_dir))
     findings.extend(_validate_references(skill_dir, text))
     findings.extend(_validate_openai_yaml(skill_dir, name))
     return findings
@@ -119,9 +161,15 @@ def find_skill_dirs(root: Path) -> list[Path]:
     if (root / "SKILL.md").exists():
         return [root]
 
-    repo_skills = root / "skills"
-    if repo_skills.exists():
-        return [child for child in sorted(repo_skills.iterdir()) if child.is_dir()]
+    skill_dirs: list[Path] = []
+    for relative_root in (OFFICIAL_SKILLS_DIR, LEGACY_SKILLS_DIR):
+        repo_skills = root / relative_root
+        if repo_skills.exists():
+            skill_dirs.extend(
+                child for child in sorted(repo_skills.iterdir()) if child.is_dir() and (child / "SKILL.md").exists()
+            )
+    if skill_dirs:
+        return skill_dirs
 
     direct_children = [child for child in sorted(root.iterdir()) if child.is_dir() and (child / "SKILL.md").exists()]
     return direct_children
@@ -155,12 +203,17 @@ def validate_root(root: Path, warnings_as_errors: bool = False) -> int:
 
 
 def find_source_root(explicit: str | None = None) -> Path:
-    candidates: list[Path] = []
     if explicit:
-        candidates.append(_resolve(explicit))
-    if os.environ.get("CODEX_HARNESS_SOURCE"):
-        candidates.append(_resolve(os.environ["CODEX_HARNESS_SOURCE"]))
+        explicit_root = _resolve(explicit)
+        if _has_skill_source_root(explicit_root):
+            return explicit_root
 
+    if os.environ.get("CODEX_HARNESS_SOURCE"):
+        env_root = _resolve(os.environ["CODEX_HARNESS_SOURCE"])
+        if _has_skill_source_root(env_root):
+            return env_root
+
+    candidates: list[Path] = []
     candidates.extend(_resolve(path) for path in (Path.cwd(), Path(__file__).resolve()))
     for base in list(candidates):
         candidates.extend(base.parents)
@@ -338,14 +391,73 @@ def cmd_new(args: argparse.Namespace) -> int:
     return 0
 
 
+def marketplace_catalog(
+    marketplace_name: str,
+    display_name: str,
+    plugin_name: str,
+    plugin_source: str,
+    category: str,
+) -> dict[str, object]:
+    if not NAME_RE.match(marketplace_name):
+        raise ValueError("marketplace name must be lowercase hyphen-case")
+    if not NAME_RE.match(plugin_name):
+        raise ValueError("plugin name must be lowercase hyphen-case")
+    if not plugin_source.startswith("./"):
+        raise ValueError("plugin source must be a relative path beginning with ./")
+    if not display_name.strip():
+        raise ValueError("display name must not be empty")
+    if not category.strip():
+        raise ValueError("category must not be empty")
+
+    return {
+        "name": marketplace_name,
+        "interface": {
+            "displayName": display_name,
+        },
+        "plugins": [
+            {
+                "name": plugin_name,
+                "source": {
+                    "source": "local",
+                    "path": plugin_source,
+                },
+                "policy": {
+                    "installation": "AVAILABLE",
+                    "authentication": "ON_INSTALL",
+                },
+                "category": category,
+            }
+        ],
+    }
+
+
+def cmd_marketplace(args: argparse.Namespace) -> int:
+    output = _resolve(args.output)
+    if output.exists() and not args.force:
+        raise FileExistsError(f"{output} already exists; pass --force to replace it")
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    catalog = marketplace_catalog(
+        args.marketplace_name,
+        args.display_name,
+        args.plugin_name,
+        args.plugin_source,
+        args.category,
+    )
+    output.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
+    print(f"OK: wrote marketplace catalog -> {output}")
+    return 0
+
+
 def cmd_init(args: argparse.Namespace) -> int:
     source_root = find_source_root(args.source_root)
     names = selected_skill_names(source_root, args.skill, args.all)
     target = _resolve(args.target)
-    skills_destination = target / "skills"
-    for name in names:
-        copy_skill(source_root, skills_destination, name, args.force)
-        print(f"OK: installed {name} -> {skills_destination / name}")
+    for relative_destination in SKILL_LAYOUTS[args.skill_layout]:
+        skills_destination = target / relative_destination
+        for name in names:
+            copy_skill(source_root, skills_destination, name, args.force)
+            print(f"OK: installed {name} -> {skills_destination / name}")
 
     if args.with_plugin:
         plugin_source = source_root / ".codex-plugin"
@@ -374,7 +486,7 @@ def build_parser() -> argparse.ArgumentParser:
     sync_select = sync.add_mutually_exclusive_group(required=True)
     sync_select.add_argument("--all", action="store_true", help="sync every skill from the source repo")
     sync_select.add_argument("--skill", action="append", help="skill name to sync; can be passed multiple times")
-    sync.add_argument("--destination", default=str(Path.home() / ".codex" / "skills"))
+    sync.add_argument("--destination", default=str(DEFAULT_USER_SKILLS_DIR))
     sync.add_argument("--source-root", help="Harness for Codex checkout; defaults to auto-detection")
     sync.add_argument("--force", action="store_true", help="replace existing destination skill directories")
     sync.set_defaults(func=cmd_sync)
@@ -390,12 +502,28 @@ def build_parser() -> argparse.ArgumentParser:
     new.add_argument("--force", action="store_true")
     new.set_defaults(func=cmd_new)
 
+    marketplace = subparsers.add_parser("marketplace", help="write a Codex plugin marketplace catalog")
+    marketplace.add_argument("output", nargs="?", default=str(Path(".agents") / "plugins" / "marketplace.json"))
+    marketplace.add_argument("--marketplace-name", default="harnessforcodex")
+    marketplace.add_argument("--display-name", default="Harness for Codex")
+    marketplace.add_argument("--plugin-name", default="harnessforcodex")
+    marketplace.add_argument("--plugin-source", default="./plugins/harnessforcodex")
+    marketplace.add_argument("--category", default="Productivity")
+    marketplace.add_argument("--force", action="store_true")
+    marketplace.set_defaults(func=cmd_marketplace)
+
     init = subparsers.add_parser("init", help="install Harness for Codex skills into a target repository")
     init.add_argument("target", nargs="?", default=".", help="target repository")
-    init_select = init.add_mutually_exclusive_group()
+    init_select = init.add_mutually_exclusive_group(required=True)
     init_select.add_argument("--all", action="store_true", help="install every source skill")
     init_select.add_argument("--skill", action="append", help="skill name to install; can be passed multiple times")
     init.add_argument("--source-root", help="Harness for Codex checkout; defaults to auto-detection")
+    init.add_argument(
+        "--skill-layout",
+        choices=sorted(SKILL_LAYOUTS),
+        default="official",
+        help="official writes .agents/skills, legacy writes skills, both writes both",
+    )
     init.add_argument("--with-plugin", action="store_true", help="copy .codex-plugin metadata")
     init.add_argument("--force", action="store_true")
     init.set_defaults(func=cmd_init)
@@ -405,8 +533,6 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    if args.command == "init" and not args.all and not args.skill:
-        args.all = True
     try:
         return args.func(args)
     except (FileExistsError, FileNotFoundError, ValueError) as exc:

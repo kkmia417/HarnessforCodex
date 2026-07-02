@@ -67,7 +67,8 @@ Run after any harness edit:
 
 ```powershell
 python .\skills\codex-harness\scripts\validate_codex_harness.py .
-python C:\Users\kkmia\.codex\skills\.system\skill-creator\scripts\quick_validate.py .\skills\codex-harness
+$CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }
+python (Join-Path $CodexHome "skills/.system/skill-creator/scripts/quick_validate.py") .\skills\codex-harness
 ```
 
 Run `quick_validate.py` for every skill that changed.

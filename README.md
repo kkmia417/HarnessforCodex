@@ -1,5 +1,8 @@
 # Harness for Codex
 
+[![CI](https://github.com/kkmia417/HarnessforCodex/actions/workflows/ci.yml/badge.svg)](https://github.com/kkmia417/HarnessforCodex/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 Turn any repository into a repeatable Codex workflow system in minutes.
 
 Harness for Codex packages reusable Codex skills, validation checks, scaffolding
@@ -12,6 +15,9 @@ codex-harness init ../my-repo --all
 codex-harness validate ../my-repo
 ```
 
+`init` installs skills to the Codex repository skill location,
+`../my-repo/.agents/skills`, by default.
+
 Then ask Codex:
 
 ```text
@@ -19,6 +25,29 @@ Use $repo-review to review the current diff.
 Use $feature-delivery to implement this bounded feature end to end.
 Use $release-readiness to decide whether this branch is ready to ship.
 ```
+
+## 30-Second Demo
+
+Before Harness for Codex, a reviewer prompt has to carry all of your team rules:
+
+```text
+Review this diff. Remember our severity policy, release checklist, docs rules,
+cross-boundary checks, and how we report findings.
+```
+
+After installing the harness, the workflow is versioned in the repository:
+
+```bash
+codex-harness init ../my-repo --all
+codex-harness validate ../my-repo
+```
+
+```text
+Use $repo-review to review the current diff.
+```
+
+Codex now has explicit review steps, severity rules, integration checks, release
+gates, and documentation verification rules available as repository skills.
 
 ## Why This Exists
 
@@ -66,17 +95,37 @@ Install all skills into another repository:
 codex-harness init ../my-repo --all
 ```
 
+By default this writes to the official repository skill location:
+
+```text
+../my-repo/.agents/skills/
+```
+
+For repositories that already use the older root `skills/` layout:
+
+```bash
+codex-harness init ../my-repo --all --skill-layout legacy
+```
+
+To write both layouts during migration:
+
+```bash
+codex-harness init ../my-repo --all --skill-layout both
+```
+
 Validate the target repository:
 
 ```bash
 codex-harness validate ../my-repo
 ```
 
-Sync skills into your local Codex skills directory:
+Sync skills into your user-level Codex skills directory:
 
 ```bash
 codex-harness sync --all --force
 ```
+
+The default sync destination is `~/.agents/skills`.
 
 Create a new skill:
 
@@ -93,6 +142,13 @@ PowerShell users can still use the repository script:
 .\scripts\sync_codex_skills.ps1 -All
 ```
 
+Generate a marketplace catalog when this plugin is mirrored under a marketplace
+root such as `plugins/harnessforcodex`:
+
+```bash
+codex-harness marketplace .agents/plugins/marketplace.json --force
+```
+
 ## Demo Path
 
 Use this sequence for a 30-second recorded demo:
@@ -100,7 +156,7 @@ Use this sequence for a 30-second recorded demo:
 ```bash
 codex-harness init examples/sandbox --all --force
 codex-harness validate examples/sandbox
-codex-harness new api-contract-review --path examples/sandbox/skills \
+codex-harness new api-contract-review --path examples/sandbox/.agents/skills \
   --description "Review API contract changes, generated clients, documentation, and consumer compatibility. Use when asked to check API changes, schema drift, client compatibility, or integration release risk."
 codex-harness validate examples/sandbox
 ```
@@ -114,6 +170,8 @@ See [docs/demo-script.md](docs/demo-script.md) for the full recording script.
   plugin.json
 docs/
   architecture.md
+  cli-reference.md
+  compatibility.md
   demo-script.md
   issue-roadmap.md
   plugin-packaging.md
@@ -151,6 +209,8 @@ The GitHub Actions workflow runs these checks on every pull request.
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [CLI reference](docs/cli-reference.md)
+- [Compatibility](docs/compatibility.md)
 - [Plugin packaging](docs/plugin-packaging.md)
 - [Issue roadmap](docs/issue-roadmap.md)
 - [Demo script](docs/demo-script.md)
@@ -158,9 +218,9 @@ The GitHub Actions workflow runs these checks on every pull request.
 
 ## Distribution Status
 
-This repository is currently `0.1.0`: usable as a source checkout and editable
-Python install. The next packaging milestones are documented in
-[docs/plugin-packaging.md](docs/plugin-packaging.md).
+This repository is currently `0.1.0`: usable as a source checkout, editable
+Python install, repository skill installer, and local plugin manifest. The next
+packaging milestones are documented in [docs/plugin-packaging.md](docs/plugin-packaging.md).
 
 ## Contributing
 

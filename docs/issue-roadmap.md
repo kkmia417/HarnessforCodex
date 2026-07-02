@@ -9,14 +9,16 @@ developer tool.
 - Keep README quickstart commands executable from a clean checkout.
 - Add examples that show concrete repository workflows.
 - Keep the plugin manifest aligned with the packaged skills.
+- Keep `.agents/skills` as the default install target while preserving legacy
+  `skills/` compatibility.
 
 ## Next
 
 - Publish a release archive with checksums.
-- Add a generated command reference for the CLI.
 - Add a recorded GIF or video from `docs/demo-script.md`.
-- Add a compatibility matrix for Codex runtime surfaces.
 - Add package publishing automation after the first tagged release.
+- Add a docs site or GitHub Pages homepage with the demo, quickstart, and
+  example walkthroughs.
 
 ## Later
 
@@ -28,7 +30,8 @@ developer tool.
 
 ## Good First Issues
 
-- Add one realistic example prompt to each example directory.
+- Add runnable fixture files beside each example scenario.
 - Add more validation for `agents/openai.yaml` shape.
 - Add macOS/Linux shell examples beside PowerShell examples.
 - Add a short troubleshooting page for common install errors.
+- Add screenshots for the plugin directory and skill invocation flow.

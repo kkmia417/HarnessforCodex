@@ -3,8 +3,12 @@
   "version": "0.1.0",
   "description": "Codex skills and references for designing, reviewing, validating, and evolving project harnesses.",
   "author": {
-    "name": "Harness for Codex Maintainers"
+    "name": "Harness for Codex Maintainers",
+    "url": "https://github.com/kkmia417/HarnessforCodex"
   },
+  "homepage": "https://github.com/kkmia417/HarnessforCodex#readme",
+  "repository": "https://github.com/kkmia417/HarnessforCodex",
+  "license": "Apache-2.0",
   "keywords": [
     "codex",
     "skills",
@@ -19,6 +23,7 @@
     "longDescription": "A package of Codex skills, references, scripts, and validation workflows for creating and maintaining repository-local harnesses.",
     "developerName": "Harness for Codex Maintainers",
     "category": "Productivity",
+    "websiteURL": "https://github.com/kkmia417/HarnessforCodex",
     "capabilities": [
       "Interactive",
       "Write"
