@@ -39,6 +39,22 @@ class CliTests(unittest.TestCase):
 
             self.assertEqual(validate_quiet(root), 0)
 
+    def test_bundled_skill_data_matches_source_skills(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        source = repo_root / "skills"
+        bundled = repo_root / "src" / "codex_harness" / "data" / "skills"
+
+        source_files = sorted(path.relative_to(source) for path in source.rglob("*") if path.is_file())
+        bundled_files = sorted(path.relative_to(bundled) for path in bundled.rglob("*") if path.is_file())
+
+        self.assertEqual(source_files, bundled_files)
+        for relative_path in source_files:
+            self.assertEqual(
+                (source / relative_path).read_text(encoding="utf-8"),
+                (bundled / relative_path).read_text(encoding="utf-8"),
+                str(relative_path),
+            )
+
     def test_validate_root_accepts_official_agents_skill_layout(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

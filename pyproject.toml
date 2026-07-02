@@ -42,4 +42,4 @@ codex-harness = "codex_harness.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-codex_harness = ["py.typed"]
+codex_harness = ["py.typed", "data/skills/**/*"]

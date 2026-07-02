@@ -36,6 +36,12 @@ codex-harness sync --all --force
 The source checkout keeps packaged skills under `skills/` because
 `.codex-plugin/plugin.json` points at `./skills/`.
 
+Python distributions also include the same skill files under
+`src/codex_harness/data/skills/`. `codex-harness init` and
+`codex-harness sync` prefer an explicit `--source-root`, then
+`CODEX_HARNESS_SOURCE`, then a nearby source checkout, and finally the bundled
+package data.
+
 ## Marketplace Catalog
 
 Generate a local marketplace catalog with:

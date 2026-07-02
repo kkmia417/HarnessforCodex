@@ -33,6 +33,10 @@ Plain prompts are easy to copy and hard to govern. Skills provide:
 The default target is `.agents/skills`; pass `--skill-layout legacy` for the
 older root `skills/` layout or `--skill-layout both` during migration.
 
+Skill source resolution is explicit first and packaged last: `--source-root`,
+then `CODEX_HARNESS_SOURCE`, then a nearby source checkout, then bundled package
+data under `codex_harness/data/skills`.
+
 `codex-harness sync` installs selected skills into the user-level Codex skills directory.
 
 `codex-harness new` scaffolds a new repository-local skill with required metadata.
@@ -45,3 +49,5 @@ or team distribution.
 The repository keeps the PowerShell sync script for Windows users who do not want
 to install the Python package. The Python CLI is the preferred cross-platform path.
 Both validators accept `.agents/skills` and the older root `skills/` layout.
+The repository script delegates to the package validator so CLI validation and
+script validation share one implementation.

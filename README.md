@@ -218,9 +218,10 @@ The GitHub Actions workflow runs these checks on every pull request.
 
 ## Distribution Status
 
-This repository is currently `0.1.0`: usable as a source checkout, editable
-Python install, repository skill installer, and local plugin manifest. The next
-packaging milestones are documented in [docs/plugin-packaging.md](docs/plugin-packaging.md).
+This repository is currently `0.1.0`: usable as a source checkout, Python
+package with bundled skills, repository skill installer, and local plugin
+manifest. The next packaging milestones are documented in
+[docs/plugin-packaging.md](docs/plugin-packaging.md).
 
 ## Contributing
 

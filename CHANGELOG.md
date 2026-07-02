@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 - Added CLI reference, compatibility documentation, and concrete example scenarios.
 - Expanded CLI tests for official skill layout, legacy compatibility, and marketplace generation.
 - Added package metadata links for documentation and changelog.
+- Added bundled package skill data for non-editable Python installs.
+- Split shared validation and scaffold logic into package modules used by both the CLI and repository scripts.
 
 ## 0.1.0 - 2026-06-26
 
